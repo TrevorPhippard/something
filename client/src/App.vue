@@ -1,30 +1,61 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+
+  import { onMounted } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
+  import { useStore } from './store/main.ts';
+  import { storeToRefs } from 'pinia';
+
+  import Socket from './components/Socket.vue'
+
+  const location = useRoute();
+  const router = useRouter();
+  const store = useStore();
+
+  const {
+    getUsername: username
+  } = storeToRefs(store)
+
+
+  onMounted(async function (){
+    store.login({
+      "Email": "trevor@trevor.com", 
+    "Password": "trevor"
+    })
+  //  var newData =  await store.getData();
+    // store.changeUserName(newData.username)
+
+  })
 </script>
 
 <template>
+  <h1>{{ username }}</h1>
+  <i>current path: {{ location.path }}</i>
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+     <nav>
+      <ul>
+
+      <li v-for="(route, index) in router.options.routes" :key="index">
+          <router-link :to="route.path">
+          {{ route.name }}
+          </router-link>
+      </li>
+    </ul>
+
+    </nav>
+  </div>  <div class="container">
+    <router-view/>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <Socket/>
+
+  <!-- <HelloWorld msg="Vite + Vue" /> -->
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+nav ul {
+  display: flex;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+nav li {
+  margin-left: 10px;
+  list-style: none;
 }
 </style>
