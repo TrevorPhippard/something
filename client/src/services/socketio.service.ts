@@ -1,9 +1,10 @@
 import { io } from 'socket.io-client';
 
 class SocketioService {
+  socket: any;
   constructor() {}
 
-  setupSocketConnection(token) {
+  setupSocketConnection(token: any) {
     // console.log(import.meta.env.VITE_SOCKET_ENDPOINT)
     this.socket = io(import.meta.env.VITE_SOCKET_ENDPOINT, {
       auth: { token },
@@ -12,24 +13,23 @@ class SocketioService {
         "my-custom-header": "abcd"
       }
     });
-    console.log(`Connecting socket...`);
+    console.log(`Connecting socket...`, this.socket);
     
-    this.socket.on('my broadcast', (data) => {
+    this.socket.on('my broadcast', (data: any) => {
       console.log(data);
     });
   }
 
-  subscribeToMessages(cb) {
+  subscribeToMessages(cb: (err: null, data: any) => any) {
+    console.log('are you returning:' , !this.socket)
     if (!this.socket) return(true);
-    this.socket.on('message', msg => {
+    this.socket.on('message', (msg: any) => {
       console.log('Room event received!');
       return cb(null, msg);
     });
   }
   
-  sendMessage({message, roomName}, cb) {
-    console.log(this.socket)
-
+  sendMessage({message, roomName}: any, cb: any) {
     if (this.socket) this.socket.emit('message', { message, roomName }, cb);
   }
   

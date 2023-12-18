@@ -1,7 +1,7 @@
 const app = require('express')();
 // const session = require('express-session');
 const bodyParser = require('body-parser');
-const cors = require('cors');
+const cors = require('cors')
 const jwt = require('jsonwebtoken');
 
 
@@ -20,8 +20,11 @@ const corsOptions = {
   credentials: true,
   origin: ['*']
 };
-app.options('*', cors()) // include before other routes
-app.use(cors(corsOptions));
+// app.options('*', cors());
+
+app.use(cors())
+
+// app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -61,12 +64,12 @@ app.use(function (req, res) {
 const socketServer = require('http').createServer(app);
 
 const io = require("socket.io")(socketServer, {
-	cors: {
-		origins: [
-      "http://localhost:5555"
-		],
+  cors: {
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
     credentials: true
-	},
+  }
 });
 
 app.get('/', (req, res) => {
@@ -77,7 +80,7 @@ io.use(async (socket, next) => {
     // fetch token from handshake auth sent by FE
     const token = socket.handshake.auth.token;
 
-    console.log('token:',token)
+    console.log('token:',token, JWT_SECRET)
     try {
       // verify jwt token and get user data
       const user = await jwt.verify(token, JWT_SECRET);

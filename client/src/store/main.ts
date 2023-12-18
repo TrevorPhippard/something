@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import AuthService from '../services/auth.service'
+import SocketioService from '../services/socketio.service.js';
 
 declare global {
     // interface Window { }
@@ -34,9 +35,12 @@ export const useStore = defineStore('main', {
             // @ts-ignore
             return AuthService.login(user).then(
               (user: User) => {
+                console.log('user::',user)
+
                 this.token = user[0].Token
                 this.loggedIn = true;
-                // this.user = user;
+                SocketioService.setupSocketConnection(this.token);
+
                 return Promise.resolve(user);
               },
               (error: any) => {
@@ -46,6 +50,7 @@ export const useStore = defineStore('main', {
               }
             )
           },
+       
     },
     getters: {
         getUsername: state => state.username,
