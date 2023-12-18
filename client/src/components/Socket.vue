@@ -2,15 +2,20 @@
 <script setup lang="ts" >
 import { ref, onMounted,  onUnmounted } from 'vue'
 import SocketioService from '../services/socketio.service.js';
-// import { useStore } from '../store/main.ts';
+import { useStore } from '../store/main.ts';
+import { storeToRefs } from 'pinia';
 
-// const store = useStore();
 
+
+const store = useStore();
+const {
+  getUsername: username
+} = storeToRefs(store)
 
 // static data only for demo purposes, in real world scenario, this would be already stored on client
 const SENDER = {
   id: "123",
-  name: "John Doe",
+  name: username.value,
 };
 
 const inputMessageText = ref('')
@@ -27,13 +32,13 @@ onUnmounted(() => SocketioService.disconnect());
 
 function submitMessage() {
   const CHAT_ROOM = "myRandomChatRoomId";
-  const message = inputMessageText.value;
-
+  const message ={ text: inputMessageText.value, ...SENDER }
+  
   SocketioService.sendMessage({ message, roomName: CHAT_ROOM }, cb => {
     // callback is acknowledgement from server
     console.log(cb);
     // @ts-ignore
-    messages.value.msg.push({ message, ...SENDER });
+    messages.value.msg.push({ message });
     inputMessageText.value = '';
   });
 }
@@ -41,11 +46,10 @@ function submitMessage() {
 </script>
 <template>
   <div>
-
     <div class="box">
       <div class="messages">
-        <div v-for="user in messages.msg" :key="user.id">
-          {{ user.name }}: {{ user.message }}
+        <div v-for="info in messages.msg" :key="info.id">
+         <strong> {{ info.message.name }}: </strong>{{ info.message.text }}
         </div>
       </div>
       <div class="messages"></div>

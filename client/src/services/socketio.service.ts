@@ -21,7 +21,6 @@ class SocketioService {
   }
 
   subscribeToMessages(cb: (err: null, data: any) => any) {
-    console.log('are you returning:' , !this.socket)
     if (!this.socket) return(true);
     this.socket.on('message', (msg: any) => {
       console.log('Room event received!');

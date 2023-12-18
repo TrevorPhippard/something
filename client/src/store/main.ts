@@ -24,7 +24,10 @@ export const useStore = defineStore('main', {
     state: ()=> ({
         token: import.meta.env.VITE_TOKEN,
         socketEndpoint: import.meta.env.VITE_SOCKET_ENDPOINT,
-        username: 'Tod',
+        username: '',
+        Email: '',
+        Id: 0,
+        memberSince:'',
         loggedIn: false,
         user:null
     }),
@@ -32,13 +35,20 @@ export const useStore = defineStore('main', {
     actions: {
         login( user: User | null) {
             console.log('login action fired')
-            // @ts-ignore
+
             return AuthService.login(user).then(
               (user: User) => {
                 console.log('user::',user)
-
+                // @ts-ignore
                 this.token = user[0].Token
+                this.username = user[0].Username
+                this.Email = user[0].Email
+                this.Id = user[0].Id
+                this.memberSince =  user[0].DateCreated
+
                 this.loggedIn = true;
+
+                localStorage.setItem("user", this.token);
                 SocketioService.setupSocketConnection(this.token);
 
                 return Promise.resolve(user);
