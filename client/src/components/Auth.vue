@@ -2,13 +2,13 @@
 
 import { ref } from 'vue'
 import { useStore } from '../store/main.ts';
-import {  useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const store = useStore();
 const router = useRouter();
 
-var email = ref('trevor@trevor.com');
-var password = ref('trevor');
+var email = ref();
+var password = ref();
 
 function submitToken(e) {
   var formData = {
@@ -17,18 +17,14 @@ function submitToken(e) {
   }
 
   store.login(formData).then(function(){
-    router.push({ path: '/page2' })
+    router.push({ path: '/chat' })
   });
-
 };
 
-function one(e){
-  console.log('a', e.target)
+function goToRegstrationPage(e){
+  router.push({ path: '/register' })
 }
 
-function two(e){
-  console.log('b', e.target)
-}
 
 </script>
 
@@ -36,10 +32,10 @@ function two(e){
   <div class="container">
     <div class="card">
       <form @submit.prevent="">
-        <input type="text" placeholder="E-Mail" v-model="email">
-        <input type="password" placeholder="Password" v-model="password">
+        <input type="email" placeholder="E-Mail" v-model="email" required>
+        <input type="password" placeholder="Password" v-model="password" required>
         <div class="buttons">
-          <button  @click="one" class="register-button">Register</button>
+          <button  @click="goToRegstrationPage" class="register-button">Register</button>
           <button  @click="submitToken" type="submit" class="login-button">Login</button>
         </div>
       </form>

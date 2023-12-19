@@ -52,9 +52,8 @@ function submitMessage() {
          <strong> {{ info.message.name }}: </strong>{{ info.message.text }}
         </div>
       </div>
-      <div class="messages"></div>
       <form class="input-div" @submit.prevent="submitMessage">
-        <input type="text" placeholder="Type in text" v-model="inputMessageText" />
+        <textarea type="text" placeholder="Type in text" v-model="inputMessageText" />
         <button type="submit">Submit</button>
       </form>
     </div>
@@ -76,8 +75,18 @@ function submitMessage() {
   margin-top: 1rem;
 }
 
+.box textarea{
+  padding:  10px;
+  min-height: 20px;
+  max-height: 90px;
+  min-width: 20px;
+  max-width: 600px;
+}
+
 .messages {
+  padding: 10px;
   flex-grow: 1;
+  text-align: left;
 }
 
 .input-div {

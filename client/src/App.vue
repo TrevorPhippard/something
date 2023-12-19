@@ -21,7 +21,7 @@ function logout(){
   onMounted( function () {
       const tokenCookie =  localStorage.getItem("user");
       if(tokenCookie){
-          router.push({ path: '/page2' })
+          router.push({ path: '/chat' })
       }else{
           router.push({ path: '/' })
       }
@@ -41,7 +41,7 @@ function logout(){
             {{ route.name }}
           </router-link>
         </li>
-        <li class="link" @click="logout">/Log Out</li>
+        <li class="link" @click="logout">/log out</li>
       </ul>
     </nav>
       <div class="container">

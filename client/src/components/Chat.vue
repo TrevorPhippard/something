@@ -9,8 +9,10 @@ import Socket from '../components/Socket.vue';
 
   onMounted( function () {
       const tokenCookie =  localStorage.getItem("user");
+    
+      console.log('tokenCookie:', tokenCookie)
       if(tokenCookie){
-          router.push({ path: '/page2' })
+          router.push({ path: '/chat' })
       }else{
           router.push({ path: '/' })
       }
@@ -19,7 +21,6 @@ import Socket from '../components/Socket.vue';
 </script>
 
 <template>
-  <h1>page 2</h1>
   <Socket />
 </template>
 

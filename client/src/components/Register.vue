@@ -7,28 +7,23 @@ import {  useRouter } from 'vue-router';
 const store = useStore();
 const router = useRouter();
 
-var email = ref('trevor@trevor.com');
-var password = ref('trevor');
+var username = ref();
+var email = ref();
+var password = ref();
 
 function submitToken(e) {
-  var formData = {
-    "Email": email.value,
-    "Password": password.value
-  }
 
-  store.login(formData).then(function(){
-    router.push({ path: '/page2' })
+    var formData = {
+        "Username": username.value,
+        "Email": email.value,
+        "Password": password.value
+    }
+
+  store.register(formData).then(function(){
+    router.push({ path: '/chat' })
   });
-
 };
 
-function one(e){
-  console.log('a', e.target)
-}
-
-function two(e){
-  console.log('b', e.target)
-}
 
 </script>
 
@@ -36,11 +31,11 @@ function two(e){
   <div class="container">
     <div class="card">
       <form @submit.prevent="">
-        <input type="text" placeholder="E-Mail" v-model="email">
-        <input type="password" placeholder="Password" v-model="password">
+        <input type="text" placeholder="username" v-model="username" required>
+        <input type="email" placeholder="email" v-model="email" required>
+        <input type="password" placeholder="password" v-model="password" required>
         <div class="buttons">
-          <button  @click="one" class="register-button">Register</button>
-          <button  @click="submitToken" type="submit" class="login-button">Login</button>
+          <button  @click="submitToken" type="submit" class="login-button">Register</button>
         </div>
       </form>
     </div>
