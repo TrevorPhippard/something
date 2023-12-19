@@ -7,11 +7,11 @@ import { useRouter } from 'vue-router';
 const store = useStore();
 const router = useRouter();
 
-var email = ref();
-var password = ref();
+const email = ref();
+const password = ref();
 
 function submitToken(e) {
-  var formData = {
+  const formData = {
     "Email": email.value,
     "Password": password.value
   }

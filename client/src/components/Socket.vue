@@ -4,34 +4,39 @@ import { ref, onMounted,  onUnmounted } from 'vue'
 import SocketioService from '../services/socketio.service.js';
 import { useStore } from '../store/main.ts';
 import { storeToRefs } from 'pinia';
-
-
+import { useRouter } from 'vue-router';
 
 const store = useStore();
+const router = useRouter();
+
 const {
-  getUsername: username
+  getUsername: username,
+  getToken: token
 } = storeToRefs(store)
 
-// static data only for demo purposes, in real world scenario, this would be already stored on client
-const SENDER = {
-  id: "123",
-  name: username.value,
-};
-
 const inputMessageText = ref('')
-var messages = ref({ msg: [] });
+const messages = ref({ msg: [] });
 
 onMounted( function () {
-  console.log('subscribe to socket')
-  SocketioService.subscribeToMessages((_err, data) => {
-    messages.value.msg.push(data);
-  });
+  if(token.value){
+    SocketioService.setupSocketConnection(token.value);
+    SocketioService.subscribeToMessages((_err, data) => {
+      messages.value.msg.push(data);
+    });
+  }else{
+   return router.push({ path: '/' })
+  }
 })
 
 onUnmounted(() => SocketioService.disconnect());
 
 function submitMessage() {
   const CHAT_ROOM = "myRandomChatRoomId";
+  const SENDER = {
+    name: username.value,
+    id: "123",
+  };
+  
   const message ={ text: inputMessageText.value, ...SENDER }
   
   SocketioService.sendMessage({ message, roomName: CHAT_ROOM }, cb => {

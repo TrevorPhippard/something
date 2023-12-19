@@ -9,41 +9,41 @@ const router = useRouter();
 const store = useStore();
 
 const {
-  getUsername: username
+  getUsername: username,
+  getToken: token
 } = storeToRefs(store)
 
 
-function logout(){
+function logout() {
   localStorage.removeItem("user");
   router.push({ path: '/' })
 }
 
-  onMounted( function () {
-      const tokenCookie =  localStorage.getItem("user");
-      if(tokenCookie){
-          router.push({ path: '/chat' })
-      }else{
-          router.push({ path: '/' })
-      }
-  })
+onMounted(function () {
+  store.setUser(localStorage.getItem("user"));
+  if (token) {
+    router.push({ path: '/chat' })
+  } else {
+    router.push({ path: '/' })
+  }
+})
 
 </script>
 
 <template>
   <div id="page-container">
     <div id="content-wrap">
-
-      {{ username  }}
+      username: {{ username }}
       <nav>
-      <ul>
-        <li v-for="(route, index) in router.options.routes" :key="index">
-          <router-link :to="route.path">
-            {{ route.name }}
-          </router-link>
-        </li>
-        <li class="link" @click="logout">/log out</li>
-      </ul>
-    </nav>
+        <ul>
+          <li v-for="(route, index) in router.options.routes" :key="index">
+            <router-link :to="route.path">
+              {{ route.name }}
+            </router-link>
+          </li>
+          <li class="link" @click="logout">/log out</li>
+        </ul>
+      </nav>
       <div class="container">
         <router-view />
       </div>
@@ -65,14 +65,16 @@ function logout(){
 }
 
 #content-wrap {
-  padding-bottom: 2.5rem;  /* Footer height */
+  padding-bottom: 2.5rem;
+  /* Footer height */
 }
 
 footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 2.5rem;  /* Footer height */
+  height: 2.5rem;
+  /* Footer height */
 }
 
 nav ul {
