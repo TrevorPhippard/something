@@ -13,9 +13,9 @@ const  password = ref();
 
 function submitToken(e) {
     const  formData = {
-        "Username": username.value,
-        "Email": email.value,
-        "Password": password.value
+        "username": username.value,
+        "email": email.value,
+        "password": password.value
     }
 
   store.register(formData).then(function(){
@@ -59,28 +59,6 @@ body {
   height: 100%;
 }
 
-.card {
-  width: 300px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
-  border-top: 4px solid #2f19be;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-input {
-  padding: 10px;
-  border: none;
-  background-color: transparent;
-  border-bottom: 1px solid #ccc;
-  color: #333;
-}
 
 .buttons {
   display: flex;
@@ -106,10 +84,4 @@ input {
   cursor: pointer;
 }
 
-@media (max-width: 480px) {
-  .card {
-    width: 100%;
-    max-width: 300px;
-  }
-}
 </style>

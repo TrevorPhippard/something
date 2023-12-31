@@ -1,156 +1,69 @@
 'use strict';
-var db = require('../../db');
-var bcrypt = require('bcryptjs');
+
+// const fs = require('fs');
 const jwt = require("jsonwebtoken");
+const bcrypt = require('bcryptjs');
 
+const login_info = require('../models/login_info');
+const user = require('../models/user');
+const salt = process.env.SALT
+//bcrypt.genSaltSync(10);
 
- exports.getAllUsers = (req, res, next) => {
-
-  var sql = "SELECT * FROM Users"
-  var params = []
-  db.all(sql, params, (err, rows) => {
-      if (err) {
-        res.status(400).json({"error":err.message});
-        return;
-      }
-      res.json({
-          "message":"success",
-          "data":rows
-      })
-    });
-};
-
-
-//* GET SINGLE USER
-
-exports.getSingleUser =  (req, res, next) => {
-  var sql = "SELECT * FROM Users WHERE Id = ?"
-  
-  db.all(sql, req.params.id, (err, rows) => {
-      if (err) {
-        res.status(400).json({"error":err.message});
-        return;
-      }
-      res.json({
-          "message":"success",
-          "data":rows
-      })
-    });
-};
-
-
-// * REGISTER NEW USER
-
-exports.registerNewUser = async (req, res) => {
-  var errors=[]
-  try {
-      const { Username, Email, Password } = req.body;
-
-      if (!Username){
-          errors.push("Username is missing");
-      }
-      if (!Email){
-          errors.push("Email is missing");
-      }
-      if (errors.length){
-          res.status(400).json({"error":errors.join(",")});
-          return;
-      }
-      let userExists = false;
-      
-      
-      var sql = "SELECT * FROM Users WHERE Email = ?"        
-      await db.all(sql, Email, (err, result) => {
-          if (err) {
-              res.status(402).json({"error":err.message});
-              return;
-          }
-          
-          if(result.length === 0) {                
-              
-              var salt = bcrypt.genSaltSync(10);
-
-              var data = {
-                  Username: Username,
-                  Email: Email,
-                  Password: bcrypt.hashSync(Password, salt),
-                  Salt: salt,
-                  DateCreated: Date('now')
-              }
-      
-              var sql ='INSERT INTO Users (Username, Email, Password, Salt, DateCreated) VALUES (?,?,?,?,?)'
-              var params =[data.Username, data.Email, data.Password, data.Salt, Date('now')]
-              var user = db.run(sql, params, function (err, innerResult) {
-                  if (err){
-                      res.status(400).json({"error": err.message})
-                      return;
-                  }
-                
-              });           
-          }            
-          else {
-              userExists = true;
-              // res.status(404).send("User Already Exist. Please Login");  
-          }
-      });
-
-      setTimeout(() => {
-          if(!userExists) {
-              res.status(201).json("Success");    
-          } else {
-              res.status(201).json("Record already exists. Please login");    
-          }            
-      }, 500);
-
-
-  } catch (err) {
-    console.log(err);
-  }
+function createUserToken(user,email ){
+    const token = jwt.sign(
+        {   user_id: user.Id, 
+            username: user.username, 
+            email
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+    );
+    return token
 }
 
+/** ------------------------------------------------------------------------ */
 
-// * LOGIN
+exports.register = async (req, res) =>{
+    console.log('req::',req.body)
+    const {username, email, password } = req.body;
+    const result = await login_info.checkExistingusername(email)
 
-exports.login =  async (req, res) => {
+    if( !result ){
+        const Pass =  bcrypt.hashSync(password, salt);
 
-try {      
+        console.log('req:login:',Pass)
 
-  const { Email, Password } = req.body;
-      // Make sure there is an Email and Password in the request
-      if (!(Email && Password)) {
-         return  res.status(400).send("All input is required");
-      }
-          
-      let user = [];
-      var sql = `SELECT * FROM Users WHERE Email = ?`;
-
-      db.all(sql, Email, function(err, rows) {
-          if (err){
-              return res.status(400).json({"error": err.message});
-          }else{
-          rows.forEach(function (row) { user.push(row) })
-          
-          var PHash = bcrypt.hashSync(Password, user[0].Salt);
-     
-          if(PHash === user[0].Password) {
-              // * CREATE JWT TOKEN
-              const token = jwt.sign(
-                  { user_id: user[0].Id, username: user[0].Username, Email },
-                  process.env.JWT_SECRET,
-                  {
-                    expiresIn: "1d", // 60s = 60 seconds - (60m = 60 minutes, 2h = 2 hours, 2d = 2 days)
-                  }  
-              );
-
-              user[0].Token = token;
-              return res.status(200).send(user);                
-          } else {
-              return res.status(400).send("No Match");          
-          }
+        // console.log(`POST REQUEST: Adding [NEW USER]: username: ${username}, email: ${email}, password: ${Pass}`);
+        await login_info.addNew(username, email, Pass);
+        const loginID = await login_info.matchWithUser(email); // find id # of table login_id
+        await user.addNew(loginID.id, email, username);
+        const Token = createUserToken(email, Pass);
         
-        }
-    });	
-  } catch (err) {
-    console.log(err);
-  }    
-};
+        res.status(202).send( {code: 202, message:'Registration successful', token:Token} );
+    }else {
+        res.status(404).send( {code: 404, message: 'username is already taken...'})
+    };
+}
+
+exports.login = async (req, res) =>{
+    const {email, password } = req.body
+    const Pass = bcrypt.hashSync(password, salt);
+    const loginID = await login_info.getId(email, Pass);
+    const Token = createUserToken(email, Pass);
+
+    if (loginID) res.send({ code: 202, user_name: loginID.user_name, token:Token });
+    else res.send({ code: 404 });
+}
+
+exports.getUsers = async (req, res) =>{
+    const users = await login_info.getAllUsers();
+    if (users) res.send(users);
+    else res.send({ code: 404 });
+}
+
+exports.fetchTableData = async (req, res) =>{
+    /** login_info  users  messages  rooms */
+    const data = await login_info.fetchByTable('login_info');
+    if (data) res.send(data);
+    else res.send({ code: 404 });
+}

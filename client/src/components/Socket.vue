@@ -2,6 +2,8 @@
 <script setup lang="ts" >
 import { ref, onMounted,  onUnmounted } from 'vue'
 import SocketioService from '../services/socketio.service.js';
+// import MsgService from '../services/msg.service.js';
+
 import { useStore } from '../store/main.ts';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
@@ -10,8 +12,10 @@ const store = useStore();
 const router = useRouter();
 
 const {
-  getUsername: username,
-  getToken: token
+  getusername: username,
+  getToken: token,
+  getRoom: roomId,
+  getAvatar: avatar
 } = storeToRefs(store)
 
 const inputMessageText = ref('')
@@ -19,7 +23,9 @@ const messages = ref({ msg: [] });
 
 onMounted( function () {
   if(token.value){
-    SocketioService.setupSocketConnection(token.value);
+    // MsgService.fetchMessages(roomId.value);
+    SocketioService.setupSocketConnection(token.value, roomId.value, username.value);
+    // SocketioService.joinRoom(roomId, username.value)
     SocketioService.subscribeToMessages((_err, data) => {
       messages.value.msg.push(data);
     });
@@ -31,19 +37,18 @@ onMounted( function () {
 onUnmounted(() => SocketioService.disconnect());
 
 function submitMessage() {
-  const CHAT_ROOM = "myRandomChatRoomId";
-  const SENDER = {
-    name: username.value,
-    id: "123",
-  };
-  
-  const message ={ text: inputMessageText.value, ...SENDER }
-  
-  SocketioService.sendMessage({ message, roomName: CHAT_ROOM }, cb => {
+
+  const message = { 
+    roomId: roomId.value, 
+    avatar: avatar.value, 
+    displayName: username.value, 
+    msg: inputMessageText.value 
+  }
+
+  SocketioService.sendMessage({ message }, (cb: any) => {
     // callback is acknowledgement from server
     console.log(cb);
     // @ts-ignore
-    messages.value.msg.push({ message });
     inputMessageText.value = '';
   });
 }
@@ -54,7 +59,7 @@ function submitMessage() {
     <div class="box">
       <div class="messages">
         <div v-for="info in messages.msg" :key="info.id">
-         <strong> {{ info.message.name }}: </strong>{{ info.message.text }}
+         <strong> {{ info.message.displayName }}: </strong>{{ info.message.msg }}
         </div>
       </div>
       <form class="input-div" @submit.prevent="submitMessage">

@@ -12,8 +12,8 @@ const password = ref();
 
 function submitToken(e) {
   const formData = {
-    "Email": email.value,
-    "Password": password.value
+    "email": email.value,
+    "password": password.value
   }
 
   store.login(formData).then(function(){
@@ -33,7 +33,7 @@ function goToRegstrationPage(e){
     <div class="card">
       <form @submit.prevent="">
         <input type="email" placeholder="E-Mail" v-model="email" required>
-        <input type="password" placeholder="Password" v-model="password" required>
+        <input type="password" placeholder="password" v-model="password" required>
         <div class="buttons">
           <button  @click="goToRegstrationPage" class="register-button">Register</button>
           <button  @click="submitToken" type="submit" class="login-button">Login</button>
@@ -61,29 +61,6 @@ body {
   height: 100%;
 }
 
-.card {
-  width: 300px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
-  border-top: 4px solid #2f19be;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-input {
-  padding: 10px;
-  border: none;
-  background-color: transparent;
-  border-bottom: 1px solid #ccc;
-  color: #333;
-}
-
 .buttons {
   display: flex;
   justify-content: flex-end;
@@ -92,12 +69,17 @@ input {
 
 .login-button {
   padding: 10px 20px;
-  background-color: #2f19be;
+  background-color: var(--accent1);
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
+
+.login-button:hover{
+  background-color: var(--accent1-hover);
+}
+
 
 .register-button {
   padding: 10px 20px;
@@ -108,10 +90,4 @@ input {
   cursor: pointer;
 }
 
-@media (max-width: 480px) {
-  .card {
-    width: 100%;
-    max-width: 300px;
-  }
-}
 </style>

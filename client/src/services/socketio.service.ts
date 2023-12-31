@@ -4,7 +4,7 @@ class SocketioService {
   socket: any;
   constructor() {}
 
-  setupSocketConnection(token: any) {
+  setupSocketConnection(token: any, room: any, username: any) {
     // console.log(import.meta.env.VITE_SOCKET_ENDPOINT)
     this.socket = io(import.meta.env.VITE_SOCKET_ENDPOINT, {
       auth: { token },
@@ -15,21 +15,39 @@ class SocketioService {
     });
     console.log(`Connecting socket...`, this.socket);
     
-    this.socket.on('my broadcast', (data: any) => {
-      console.log(data);
-    });
+    this.socket.emit('join', { roomId: room, userId: username, socketId: this.socket.id });
+  }
+
+
+
+   joinRoom(room: any, username: any) {
+    // leave old room
+    // if (currentRoomId) {
+    //     this.socket.emit('leave', { roomId: currentRoomId, userId: userInfo.id, socketId: this.socket.id });
+    // }
+    // load old messages in new room
+    // join new room
+    this.socket.emit('join', { roomId: room, userId: username, socketId: this.socket.id });
+
   }
 
   subscribeToMessages(cb: (err: null, data: any) => any) {
     if (!this.socket) return(true);
     this.socket.on('message', (msg: any) => {
-      console.log('Room event received!');
+      console.log('message',msg)
       return cb(null, msg);
     });
+    this.socket.on('receivedMsg', (msg: any) => {
+      console.log('receivedMsg',msg)
+      return cb(null, msg);
+    });
+
   }
   
-  sendMessage({message, roomName}: any, cb: any) {
-    if (this.socket) this.socket.emit('message', { message, roomName }, cb);
+  sendMessage({message}: any, cb: any) {
+    if (this.socket) {
+      this.socket.emit('message', { message }, cb);
+    }
   }
   
   disconnect() {

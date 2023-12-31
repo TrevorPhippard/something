@@ -3,9 +3,9 @@
 module.exports = function (app) {
   const userHandlers = require('../controllers/userController.js');
   
-  //  Routes
-  app.route('/api/users').get(userHandlers.getAllUsers);
-  app.route("/api/user/:id").get(userHandlers.getSingleUser);
-  app.route("/auth/signin").post(userHandlers.login);
-  app.route("/auth/signup").post(userHandlers.registerNewUser);
+  /** delete for production */
+  app.route('/auth/checktable').get(userHandlers.fetchTableData);
+  app.route('/auth/signup').post(userHandlers.register);
+  app.route('/auth/signin').post(userHandlers.login);
+  app.route('/auth/users').get(userHandlers.getUsers);
 };

@@ -16,44 +16,45 @@ declare global {
 
 
 interface User {
-  Email: string,
-  Password: string
-  Username?: string
+  email: string,
+  password: string
+  username?: string
 }
 
 export const useStore = defineStore('main', {
   state: () => ({
     token: import.meta.env.VITE_TOKEN,
     socketEndpoint: import.meta.env.VITE_SOCKET_ENDPOINT,
+    roomId: 'myRandomChatRoomId',
+    avatar: '',
     username: '',
-    Email: '',
+    email: '',
     Id: 0,
     memberSince: '',
     loggedIn: false,
     user: {
-      "Id": false,
-      "Username": null,
-      "Email": null,
-      "Token": null,
-      "DateLoggedIn": null,
-      "DateCreated": null
+      code: 202, 
+      user_name: '', 
+      token: ''
     },
   }),
 
   actions: {
     setUser(cookieData: any) {
       this.user = JSON.parse(cookieData).data;
-      this.token = this.user.Token;
+      this.token = this.user.token;
     },
 
     login(user: User | null) {
       return AuthService.login(user).then(
         (user: any) => {
-          this.user = user[0];
+
+          this.user = user;
           this.loggedIn = true;
-         
-          localStorage.setItem("user",  JSON.stringify({data:this.user}));
-          SocketioService.setupSocketConnection(this.token);
+          console.log(this.user)
+
+          localStorage.setItem("user", JSON.stringify({data:this.user}));
+          SocketioService.setupSocketConnection(this.user.token);
 
           return Promise.resolve(user);
         },
@@ -71,7 +72,7 @@ export const useStore = defineStore('main', {
           this.user = user;
           this.loggedIn = true;
           localStorage.setItem("user", JSON.stringify({data:this.user}));
-          SocketioService.setupSocketConnection(this.user.Token);
+          SocketioService.setupSocketConnection(this.user.token);
 
           return Promise.resolve(user);
 
@@ -86,8 +87,10 @@ export const useStore = defineStore('main', {
 
   },
   getters: {
-    getUsername: state => state.user.Username,
-    getToken: state => state.user.Token,
-    getEndPoint: state => state.socketEndpoint
+    getusername: state => state.user.user_name,
+    getToken: state => state.user.token,
+    getEndPoint: state => state.socketEndpoint,
+    getRoom: state => state.roomId,
+    getAvatar: state => state.avatar,
   }
 })

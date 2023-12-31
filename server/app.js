@@ -10,6 +10,7 @@ require('dotenv').config();
 // jwt secret
 const JWT_SECRET = process.env.JWT_SECRET ;
 const SESSION_SECRET = '23';
+let userList = [];
 
 
 /** ---------------------------------------------------------------------------
@@ -47,10 +48,12 @@ app.use(bodyParser.urlencoded({
  *  @Routes
  * --------------------------------------------------------------------------- */
 
-const routes = require('./api/routes/userRoutes');
+require('./api/routes/userRoutes')(app);
+require('./api/routes/chatRoutes')(app);
+// require('./api/routes/socketListeners')(app);
 
-routes(app);
 app.use(function (req, res) {
+  console.log(req.originalUrl)
   res.status(404).send({
     url: req.originalUrl + ' not found'
   });
@@ -61,7 +64,7 @@ app.use(function (req, res) {
  *  @Sockets
  * --------------------------------------------------------------------------- */
 
-const socketServer = require('http').createServer(app);
+const socketServer = require('http').createServer(app, userList);
 
 const io = require("socket.io")(socketServer, {
   cors: {
@@ -71,69 +74,22 @@ const io = require("socket.io")(socketServer, {
     credentials: true
   }
 });
-
-app.get('/', (req, res) => {
-    res.send('<h1>Hey Socket.io</h1>');
-  });
   
-io.use(async (socket, next) => {
-    // fetch token from handshake auth sent by FE
+  io.use(async (socket, next) => {
     const token = socket.handshake.auth.token;
-
-    console.log('token:',token, JWT_SECRET)
+    // console.log('token:',token, JWT_SECRET)
     try {
-      // verify jwt token and get user data
       const user = await jwt.verify(token, JWT_SECRET);
-      console.log('user', user);
-      // save the user data into socket object, to be used further
       socket.user = user;
       next();
     } catch (e) {
-      // if token is invalid, close connection
       console.log('error', e.message);
       return next(new Error(e.message));
     }
   });
   
-  io.on('connection', (socket) => {
-    // join user's own room
-    socket.join(socket.user.id);
-    socket.join('myRandomChatRoomId');
-    // find user's all channels from the database and call join event on all of them.
-    console.log('a user connected');
-    socket.on('disconnect', () => {
-      console.log('user disconnected');
-    });
-    socket.on('my message', (msg) => {
-      console.log('message: ' + msg);
-      io.emit('my broadcast', `server: ${msg}`);
-    });
-  
-    socket.on('join', (roomName) => {
-      console.log('join: ' + roomName);
-      socket.join(roomName);
-    });
-  
-    socket.on('message', ({message, roomName}, callback) => {
-      console.log('message: ' + message + ' in ' + roomName);
-  
-      // generate data to send to receivers
-      const outgoingMessage = {
-        name: socket.user.name,
-        id: socket.user.id,
-        message,
-      };
-      // send socket to all in room except sender
-      socket.to(roomName).emit("message", outgoingMessage);
-      callback({
-        status: "ok"
-      });
-      // send to all including sender
-      // io.to(roomName).emit('message', message);
-    })
-  });
-  
- 
+  io.on('connection', (socket) => require('./api/routes/socketIO.js')(io, socket, userList));
+
   socketServer.listen(3001, () => {
     console.log('SOCKET listening on *:3001');
   });

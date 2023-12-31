@@ -1,24 +1,27 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/auth/';
-
 interface User {
-  Email: string,
-  Password: string
-  Username?: string
+  email: string,
+  password: string
+  username?: string
 }
 
 class AuthService {
+  endpoint: string;
+
+  constructor(){
+    this.endpoint = import.meta.env.VITE_API_ENDPOINT+'/auth/';
+  }
 
   login(user: User | null) {
-    return axios.post(API_URL + 'signin', user)
+    return axios.post(this.endpoint + 'signin', user)
       .then(response => {
         return response.data;
       });
   }
 
   register(user: User | null) {
-    return axios.post(API_URL + 'signup', user).then(response => {
+    return axios.post(this.endpoint + 'signup', user).then(response => {
         return response.data;
     });
   }

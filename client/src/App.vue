@@ -9,7 +9,7 @@ const router = useRouter();
 const store = useStore();
 
 const {
-  getUsername: username,
+  getusername: username,
   getToken: token
 } = storeToRefs(store)
 
@@ -20,7 +20,8 @@ function logout() {
 }
 
 onMounted(function () {
-  store.setUser(localStorage.getItem("user"));
+  var cookie =  localStorage.getItem("user");
+  if(cookie) {store.setUser(cookie)};
   if (token) {
     router.push({ path: '/chat' })
   } else {
@@ -33,25 +34,22 @@ onMounted(function () {
 <template>
   <div id="page-container">
     <div id="content-wrap">
-      username: {{ username }}
       <nav>
+        username: {{ username }}
         <ul>
           <li v-for="(route, index) in router.options.routes" :key="index">
             <router-link :to="route.path">
               {{ route.name }}
             </router-link>
           </li>
-          <li class="link" @click="logout">/log out</li>
+          <li class="link" @click="logout"><a href="#">/log out</a></li>
         </ul>
       </nav>
       <div class="container">
         <router-view />
       </div>
     </div>
-    <footer id="footer">
-      <i>current path: {{ location.path }}</i>
-
-    </footer>
+    <footer id="footer"><i>current path: {{ location.path }}</i></footer>
   </div>
 
 
