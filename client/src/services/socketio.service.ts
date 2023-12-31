@@ -18,9 +18,8 @@ class SocketioService {
     this.socket.emit('join', { roomId: room, userId: username, socketId: this.socket.id });
   }
 
-
-
    joinRoom(room: any, username: any) {
+    console.log('join', room)
     // leave old room
     // if (currentRoomId) {
     //     this.socket.emit('leave', { roomId: currentRoomId, userId: userInfo.id, socketId: this.socket.id });
@@ -33,14 +32,8 @@ class SocketioService {
 
   subscribeToMessages(cb: (err: null, data: any) => any) {
     if (!this.socket) return(true);
-    this.socket.on('message', (msg: any) => {
-      console.log('message',msg)
-      return cb(null, msg);
-    });
-    this.socket.on('receivedMsg', (msg: any) => {
-      console.log('receivedMsg',msg)
-      return cb(null, msg);
-    });
+    this.socket.on('message', (msg: any) => cb(null, msg) );
+    this.socket.on('receivedMsg', (msg: any) => cb(null, msg) );
 
   }
   

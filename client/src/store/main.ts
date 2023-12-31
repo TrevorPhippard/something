@@ -27,7 +27,6 @@ export const useStore = defineStore('main', {
     socketEndpoint: import.meta.env.VITE_SOCKET_ENDPOINT,
     roomId: 'myRandomChatRoomId',
     avatar: '',
-    username: '',
     email: '',
     Id: 0,
     memberSince: '',

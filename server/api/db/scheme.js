@@ -32,8 +32,8 @@ var create_login_info = `CREATE TABLE login_info (
   
  var create_messages = `CREATE TABLE messages (
     id INTEGER AUTO_INCREMENT,
-    user_id INTEGER,
-    room_id INTEGER,
+    user_id VARCHAR(30),
+    room_id VARCHAR(30),
     message_body VARCHAR(300),
     PRIMARY KEY(id)
   )`;

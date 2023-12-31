@@ -52,7 +52,7 @@ class LoginInfo {
     
     async fetchByTable(data) {
         const result = await orm.selectAll(data);
-        if (result.length) return null;
+        if (!result.length) return null;
         else return result;
     }
 }

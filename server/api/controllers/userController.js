@@ -1,13 +1,11 @@
 'use strict';
 
-// const fs = require('fs');
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs');
 
 const login_info = require('../models/login_info');
 const user = require('../models/user');
 const salt = process.env.SALT
-//bcrypt.genSaltSync(10);
 
 function createUserToken(user,email ){
     const token = jwt.sign(
@@ -24,22 +22,17 @@ function createUserToken(user,email ){
 /** ------------------------------------------------------------------------ */
 
 exports.register = async (req, res) =>{
-    console.log('req::',req.body)
     const {username, email, password } = req.body;
     const result = await login_info.checkExistingusername(email)
 
     if( !result ){
         const Pass =  bcrypt.hashSync(password, salt);
-
-        console.log('req:login:',Pass)
-
-        // console.log(`POST REQUEST: Adding [NEW USER]: username: ${username}, email: ${email}, password: ${Pass}`);
         await login_info.addNew(username, email, Pass);
         const loginID = await login_info.matchWithUser(email); // find id # of table login_id
         await user.addNew(loginID.id, email, username);
         const Token = createUserToken(email, Pass);
         
-        res.status(202).send( {code: 202, message:'Registration successful', token:Token} );
+        res.status(202).send( {code: 202, user_name: loginID.user_name, message:'Registration successful', token:Token} );
     }else {
         res.status(404).send( {code: 404, message: 'username is already taken...'})
     };
@@ -63,7 +56,7 @@ exports.getUsers = async (req, res) =>{
 
 exports.fetchTableData = async (req, res) =>{
     /** login_info  users  messages  rooms */
-    const data = await login_info.fetchByTable('login_info');
+    const data = await login_info.fetchByTable('messages');
     if (data) res.send(data);
     else res.send({ code: 404 });
 }

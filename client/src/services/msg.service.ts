@@ -4,7 +4,7 @@ class msgService {
     endpoint: string;
   
     constructor(){
-      this.endpoint = import.meta.env.VITE_API_ENDPOINT+'/messages/';
+      this.endpoint = import.meta.env.VITE_API_ENDPOINT+'/api/messages/';
     }
 
     fetchMessages(roomId: string) {

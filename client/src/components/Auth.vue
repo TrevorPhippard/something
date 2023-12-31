@@ -10,7 +10,7 @@ const router = useRouter();
 const email = ref();
 const password = ref();
 
-function submitToken(e) {
+function submitToken() {
   const formData = {
     "email": email.value,
     "password": password.value
@@ -21,7 +21,7 @@ function submitToken(e) {
   });
 };
 
-function goToRegstrationPage(e){
+function goToRegstrationPage(){
   router.push({ path: '/register' })
 }
 

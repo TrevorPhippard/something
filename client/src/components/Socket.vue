@@ -1,8 +1,8 @@
 
 <script setup lang="ts" >
-import { ref, onMounted,  onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import SocketioService from '../services/socketio.service.js';
-// import MsgService from '../services/msg.service.js';
+import MsgService from '../services/msg.service.js';
 
 import { useStore } from '../store/main.ts';
 import { storeToRefs } from 'pinia';
@@ -19,18 +19,34 @@ const {
 } = storeToRefs(store)
 
 const inputMessageText = ref('')
-const messages = ref({ msg: [] });
+const messages = ref([]);
 
-onMounted( function () {
-  if(token.value){
-    // MsgService.fetchMessages(roomId.value);
+onMounted(function () {
+  if (token.value) {
     SocketioService.setupSocketConnection(token.value, roomId.value, username.value);
-    // SocketioService.joinRoom(roomId, username.value)
     SocketioService.subscribeToMessages((_err, data) => {
-      messages.value.msg.push(data);
+      messages.value.push(data);
     });
-  }else{
-   return router.push({ path: '/' })
+
+    MsgService.fetchMessages(roomId.value)
+      .then(result => {
+
+        result.map(data => {
+          return {
+            message: {
+              id: data.id,
+              displayName: data.user_id,
+              msg: data.message_body
+            }
+          }
+        }).map(data => {
+          console.log(data)
+          return messages.value.push(data);
+        })
+      })
+
+  } else {
+    return router.push({ path: '/' })
   }
 })
 
@@ -38,11 +54,11 @@ onUnmounted(() => SocketioService.disconnect());
 
 function submitMessage() {
 
-  const message = { 
-    roomId: roomId.value, 
-    avatar: avatar.value, 
-    displayName: username.value, 
-    msg: inputMessageText.value 
+  const message = {
+    roomId: roomId.value,
+    avatar: avatar.value,
+    displayName: username.value,
+    msg: inputMessageText.value
   }
 
   SocketioService.sendMessage({ message }, (cb: any) => {
@@ -58,8 +74,8 @@ function submitMessage() {
   <div>
     <div class="box">
       <div class="messages">
-        <div v-for="info in messages.msg" :key="info.id">
-         <strong> {{ info.message.displayName }}: </strong>{{ info.message.msg }}
+        <div v-for="info in messages" :key="info.id">
+          <strong> {{ info.message.displayName }}: </strong>{{ info.message.msg }}
         </div>
       </div>
       <form class="input-div" @submit.prevent="submitMessage">
@@ -85,8 +101,8 @@ function submitMessage() {
   margin-top: 1rem;
 }
 
-.box textarea{
-  padding:  10px;
+.box textarea {
+  padding: 10px;
   min-height: 20px;
   max-height: 90px;
   min-width: 20px;
@@ -97,6 +113,7 @@ function submitMessage() {
   padding: 10px;
   flex-grow: 1;
   text-align: left;
+  background-color: #1a1a1a;
 }
 
 .input-div {

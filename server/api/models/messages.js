@@ -13,15 +13,14 @@ class Messages {
 
     async getRoomMsgs(roomId) {
         const result = await orm.directQuery(
-        `SELECT messages.room_id, users.avatar_dirct, users.user_name, messages.message_body 
-        FROM messages LEFT JOIN users ON users.id = user_id WHERE room_id = ${roomId};`);
+        `SELECT * FROM messages`);
         return result;
     }
 
     // add message output: { user, channel, msg }
     async addMsgToRoom(userId, roomId, msg) {
         const variableQuery = `(user_id, room_id, message_body)`;
-        const dataQuery = `(${userId}, ${roomId}, \'${msg}\')`;
+        const dataQuery = `(\'${userId}\', \'${roomId}\', \'${msg}\')`;
         await orm.insertOne(this.name,variableQuery,dataQuery);
     }
 

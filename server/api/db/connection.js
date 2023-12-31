@@ -39,10 +39,10 @@ class Database {
         return new Promise((resolve, reject) => {
             // console.log('database query: ==>',sql, args)
             this.db.all(sql, args, (error, rows) => {
-                // console.log('rows: ==>',rows)
                 if (error) {
                     return reject(error);
                 } else {
+                    // console.log('rows: ==>',rows)
                     resolve(rows);
                 }
             });
